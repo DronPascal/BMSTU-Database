@@ -1,0 +1,67 @@
+CREATE table tree 
+(branch text NOT NULL)
+
+SELECT * FROM tree
+
+//SORT
+SELECT * FROM tree ORDER BY branch
+SELECT * FROM tree ORDER BY (length(branch)-length(replace(lower(branch),'.',''))) ASC, branch DESC
+
+SELECT *, (RIGHT(branch ,POSITION('.' in REVERSE(branch))-1)) as br_number FROM tree ORDER BY cast(RIGHT(branch ,POSITION('.' in REVERSE(branch))-1) AS int)
+
+//big tree
+insert into tree (branch) values 
+('1.2.5'),
+('1.2.6'),
+('1.4'),
+('1.3.8'),
+('1.3.7.9.12.19'),
+('1.3.7.9.12.20'),
+('1.3.7.9.12.21'),
+('1.3.7.9.13.22.31.40'),
+('1.3.7.9.13.23.32.41'),
+('1.3.7.9.13.23.32.42'),
+('1.3.7.9.13.23.32.43'),
+('1.3.7.10.14'),
+('1.3.7.10.15.24.33'),
+('1.3.7.10.15.25.34'),
+('1.3.7.10.15.25.35.44'),
+('1.3.7.10.15.25.35.45'),
+('1.3.7.11.16.25'),
+('1.3.7.11.16.27'),
+('1.3.7.11.17.28.36'),
+('1.3.7.11.17.28.37'),
+('1.3.7.11.17.29.38'),
+('1.3.7.11.17.29.39'),
+('1.3.7.11.17.30'),
+('1.3.7.11.18')
+
+//add primary key
+ALTER TABLE tree ADD COLUMN br_number int
+UPDATE tree SET br_number = cast(RIGHT(branch ,POSITION('.' in REVERSE(branch))-1) AS int)
+ALTER TABLE tree ADD PRIMARY KEY (br_number)
+
+//Postgres SQL func
+CREATE FUNCTION fnSmallerBranches
+(minb text)
+RETURNS TABLE (branch text) AS $$
+	SELECT branch FROM tree where ((branch like '%.' || minb || '.%') or (branch like minb || '.%'))
+$$ LANGUAGE SQL
+
+SELECT fnSmallerBranches('11')
+
+
+//toys
+ALTER TABLE tree ADD COLUMN toy_weight int 
+alter table tree drop column toy_weight
+UPDATE tree SET toy_weight = random()*25
+
+CREATE TABLE toys (branch int REFERENCES tree (br_number), weight int)
+insert into toys (branch) SELECT br_number FROM tree
+UPDATE toys SET weight = random()*25
+
+//вес игрушек выше ветви
+SELECT sum(toy_weight) FROM tree where branch in (SELECT fnSmallerBranches('13')) 
+
+//for multitable db
+SELECT sum(weight) FROM toys where branch in (SELECT br_number FROM tree where branch in (SELECT fnSmallerBranches('13')))

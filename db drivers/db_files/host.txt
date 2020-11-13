@@ -1,0 +1,9 @@
+IP 195.19.32.74
+
+login "student"
+
+password "bmstu"
+
+database1 "fn1131_2016"
+
+database2 "fn1132_2016"

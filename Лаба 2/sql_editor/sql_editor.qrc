@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>fonts/Verdana.ttf</file>
+        <file>fonts/Yugothic.ttf</file>
+    </qresource>
+</RCC>
